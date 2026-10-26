@@ -6,8 +6,9 @@ import { readFileSync } from 'node:fs'
 import { apply, Config } from './session-cost/index.js'
 
 const file = process.argv[2]
-if (file === undefined) {
-  console.error('usage: node price-session.mjs <session.jsonl>')
+const inherited = process.argv[3] === undefined ? 0 : Number(process.argv[3])
+if (file === undefined || !Number.isInteger(inherited) || inherited < 0) {
+  console.error('usage: node price-session.mjs <session.jsonl> [inheritedEventCount]')
   process.exit(2)
 }
 
@@ -15,7 +16,7 @@ const definitions = []
 apply({ sessionProjections: { register: (definition) => definitions.push(definition) } }, Config['~standard'].validate(undefined).value)
 const definition = definitions[0]
 
-let state = definition.init()
+let state = definition.init({}, inherited)
 let events = 0
 for (const line of readFileSync(file, 'utf8').split('\n')) {
   if (line.trim() === '') continue

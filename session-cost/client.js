@@ -9,7 +9,9 @@ window.__ModuleLoader__.load({
     const DICT = {
       en: {
         'pill.label': 'Estimated session cost {value}',
+        'pill.labelSubagents': 'Estimated cost including subagents {value}',
         'pill.hint': 'Priced from this session’s token usage',
+        'pill.hintSubagents': 'Priced from this session and its local subagent sessions',
         'panel.title': 'Session cost',
         'panel.model': 'Model',
         'panel.cacheMiss': 'Input · cache miss',
@@ -17,8 +19,15 @@ window.__ModuleLoader__.load({
         'panel.cacheWrite': 'Cache write',
         'panel.output': 'Output',
         'panel.total': 'Total',
-        'panel.tier.peak': 'Priced at peak-hour rates.',
-        'panel.tier.idle': 'Priced at off-peak rates.',
+        'panel.thisSession': 'This session',
+        'panel.subagents': 'Subagents ({count})',
+        'panel.subagentLoading': 'Reading subagent sessions…',
+        'panel.subagentError': '{count} subagent session(s) could not be read.',
+        'panel.subagentUnavailable': '{count} subagent session(s) have no cost projection.',
+        'panel.subagentExternal': '{count} external subagent(s) are not priced.',
+        'panel.subagentMismatch': '{count} subagent session(s) use a different price and are excluded.',
+        'panel.tier.peak': 'This session was priced at peak-hour rates.',
+        'panel.tier.idle': 'This session was priced at off-peak rates.',
         'panel.unpriced': '{count} tokens had no configured price.',
         'panel.fallback': '{count} tokens used the fallback model’s price.',
         'panel.converted': 'Converted from {from} at 1 {from} = {rate} {symbol}.',
@@ -28,7 +37,9 @@ window.__ModuleLoader__.load({
       },
       zh: {
         'pill.label': '会话预估费用 {value}',
+        'pill.labelSubagents': '会话预估费用（含子代理）{value}',
         'pill.hint': '按本会话的 token 用量估算',
+        'pill.hintSubagents': '按本会话及其本地子代理会话的 token 用量估算',
         'panel.title': '会话费用',
         'panel.model': '模型',
         'panel.cacheMiss': '输入 · 缓存未命中',
@@ -36,8 +47,15 @@ window.__ModuleLoader__.load({
         'panel.cacheWrite': '缓存写入',
         'panel.output': '输出',
         'panel.total': '合计',
-        'panel.tier.peak': '按高峰时段价格计算。',
-        'panel.tier.idle': '按空闲时段价格计算。',
+        'panel.thisSession': '本会话',
+        'panel.subagents': '子代理（{count}）',
+        'panel.subagentLoading': '正在读取子代理会话…',
+        'panel.subagentError': '{count} 个子代理会话无法读取。',
+        'panel.subagentUnavailable': '{count} 个子代理会话没有费用数据。',
+        'panel.subagentExternal': '{count} 个外部子代理未计价。',
+        'panel.subagentMismatch': '{count} 个子代理会话使用不同价格，已排除。',
+        'panel.tier.peak': '本会话按高峰时段价格计算。',
+        'panel.tier.idle': '本会话按空闲时段价格计算。',
         'panel.unpriced': '{count} 个 token 没有可用价格。',
         'panel.fallback': '{count} 个 token 使用了备用模型的价格。',
         'panel.converted': '按 1 {from} = {rate} {symbol} 换算。',
@@ -93,6 +111,68 @@ window.__ModuleLoader__.load({
       return fixed.includes('.') ? fixed.replace(/0+$/, '').replace(/\.$/, '') : fixed
     }
 
+    /**
+     * Money carried by one `sessionCost` wire value.
+     * @param cost - one session's cost projection value.
+     * @returns the summed display-currency amount.
+     */
+    function costTotal(cost) {
+      if (cost === null || cost === undefined || cost.totals === undefined || cost.totals === null) return 0
+      const totals = cost.totals
+      return (
+        (Number.isFinite(totals.cacheMiss) ? totals.cacheMiss : 0) +
+        (Number.isFinite(totals.cacheHit) ? totals.cacheHit : 0) +
+        (Number.isFinite(totals.cacheWrite) ? totals.cacheWrite : 0) +
+        (Number.isFinite(totals.output) ? totals.output : 0)
+      )
+    }
+
+    /**
+     * Flatten the local subagent tree below one session. Children come from the
+     * parent-owned `subagentCatalog` projection; each child's own catalog is
+     * read from the session-list projection snapshot, so nested delegation is
+     * included. External children have no local Session and therefore no cost.
+     * @param rootId - the session whose pill is open.
+     * @param rootCatalog - the root session's direct children.
+     * @param projections - `useSessions().projectionsBySession`.
+     * @returns descendant rows in discovery order.
+     */
+    function collectSubagentCosts(rootId, rootCatalog, projections) {
+      const nodes = []
+      const seen = new Set([rootId])
+      const queue = []
+      const push = (catalog, depth) => {
+        if (!Array.isArray(catalog)) return
+        for (const entry of catalog) {
+          if (entry === null || typeof entry !== 'object' || typeof entry.id !== 'string') continue
+          if (seen.has(entry.id)) continue
+          queue.push({ entry, depth })
+        }
+      }
+      push(rootCatalog, 1)
+      let guard = 0
+      while (queue.length > 0 && guard < 200) {
+        guard += 1
+        const { entry, depth } = queue.shift()
+        if (seen.has(entry.id)) continue
+        seen.add(entry.id)
+        if (entry.mode === 'external') {
+          nodes.push({ id: entry.id, label: entry.label, depth, external: true })
+          continue
+        }
+        const snapshot = projections[entry.id]
+        const cost = snapshot === undefined ? undefined : snapshot.values?.sessionCost
+        const state = snapshot === undefined ? undefined : snapshot.state
+        const error = state === 'error'
+        const unavailable = cost === undefined && (state === 'ready' || state === 'migration-required')
+        const loading = cost === undefined && !error && !unavailable
+        nodes.push({ id: entry.id, label: entry.label, depth, cost, loading, error, unavailable })
+        const catalog = snapshot === undefined ? undefined : snapshot.values?.subagentCatalog
+        if (Array.isArray(catalog)) push(catalog, depth + 1)
+      }
+      return nodes
+    }
+
     function Tokens({ children }) {
       return h('span', { className: 'dsc-count' }, compact.format(children))
     }
@@ -113,12 +193,15 @@ window.__ModuleLoader__.load({
      * @param props - session slot props (`useProjection`) plus the bound `t`.
      * @returns the pill, or nothing while the session has no priced usage.
      */
-    function SessionCost({ useProjection, t }) {
+    function SessionCost({ useProjection, useSessions, ensureProjections, sessionId, t }) {
       const cost = useProjection('sessionCost')
+      const liveCatalog = useProjection('subagentCatalog')
+      const projections = useSessions((state) => state.projectionsBySession) ?? {}
       const [open, setOpen] = React.useState(false)
       const [position, setPosition] = React.useState(null)
       const rootRef = React.useRef(null)
       const panelRef = React.useRef(null)
+      const requested = React.useRef(new Set())
 
       React.useEffect(() => {
         if (!open) return undefined
@@ -139,14 +222,49 @@ window.__ModuleLoader__.load({
         }
       }, [open])
 
+      const catalog = liveCatalog ?? projections[sessionId]?.values?.subagentCatalog
+      const nodes = collectSubagentCosts(sessionId, catalog, projections)
+      const localChildren = nodes.filter((node) => node.external !== true)
+      const childCount = localChildren.length
+      const externalCount = nodes.length - childCount
+      const loadingCount = localChildren.filter((node) => node.loading).length
+      const errorCount = localChildren.filter((node) => node.error).length
+      const unavailableCount = localChildren.filter((node) => node.unavailable).length
+      const pendingIds = localChildren.filter((node) => node.loading).map((node) => node.id)
+      const pendingKey = pendingIds.join('|')
+
+      React.useEffect(() => {
+        if (typeof ensureProjections !== 'function') return
+        for (const id of pendingIds) {
+          if (requested.current.has(id)) continue
+          requested.current.add(id)
+          Promise.resolve(ensureProjections(id)).catch(() => {})
+        }
+      }, [pendingKey, ensureProjections])
+
       if (cost === undefined || cost === null) return null
 
-      const tokens = cost.tokens
-      const totals = cost.totals
-      if (tokens.cacheMiss + tokens.cacheHit + tokens.cacheWrite + tokens.output === 0) return null
-
-      const total = totals.cacheMiss + totals.cacheHit + totals.cacheWrite + totals.output
-      const display = cost.symbol + formatMoney(total)
+      const tokens = cost.tokens ?? { cacheMiss: 0, cacheHit: 0, cacheWrite: 0, output: 0 }
+      const totals = cost.totals ?? { cacheMiss: 0, cacheHit: 0, cacheWrite: 0, output: 0 }
+      const parentTotal = costTotal(cost)
+      const samePrice = (child) =>
+        child.cost !== undefined &&
+        child.cost !== null &&
+        child.cost.symbol === cost.symbol &&
+        child.cost.rate === cost.rate
+      const pricedChildren = localChildren.filter(samePrice)
+      const childTotal = pricedChildren.reduce((sum, child) => sum + costTotal(child.cost), 0)
+      const mismatchCount = localChildren.filter(
+        (child) => child.cost !== undefined && child.cost !== null && !samePrice(child),
+      ).length
+      const unpriced =
+        (cost.unpricedTokens ?? 0) + localChildren.reduce((sum, child) => sum + (child.cost?.unpricedTokens ?? 0), 0)
+      const fallback =
+        (cost.fallbackTokens ?? 0) + localChildren.reduce((sum, child) => sum + (child.cost?.fallbackTokens ?? 0), 0)
+      const total = parentTotal + childTotal
+      const pending = loadingCount > 0
+      if (total <= 0 && !pending) return null
+      const display = (pending ? '≈' : '') + cost.symbol + formatMoney(total)
 
       function toggle(event) {
         if (open) {
@@ -196,6 +314,21 @@ window.__ModuleLoader__.load({
           amount: cost.symbol + formatMoney(totals.output),
         }),
         h('div', { className: 'dsc-sep', key: 'sep-2' }),
+        childCount > 0
+          ? h(Row, {
+              key: 'this-session',
+              label: t('panel.thisSession'),
+              amount: cost.symbol + formatMoney(parentTotal),
+            })
+          : null,
+        childCount > 0
+          ? h(Row, {
+              key: 'subagents',
+              label: t('panel.subagents', { count: childCount }),
+              amount: pending ? '…' : cost.symbol + formatMoney(childTotal),
+            })
+          : null,
+        childCount > 0 ? h('div', { className: 'dsc-sep', key: 'sep-3' }) : null,
         h(
           'div',
           { className: 'dsc-row dsc-total', key: 'total' },
@@ -219,14 +352,41 @@ window.__ModuleLoader__.load({
       if (cost.tier === 'peak' || cost.tier === 'idle') {
         rows.push(h('div', { className: 'dsc-note', key: 'tier' }, t('panel.tier.' + cost.tier)))
       }
-      if (cost.unpricedTokens > 0) {
+      if (pending) {
+        rows.push(h('div', { className: 'dsc-note', key: 'subagent-loading' }, t('panel.subagentLoading')))
+      }
+      if (errorCount > 0) {
         rows.push(
-          h('div', { className: 'dsc-note', key: 'unpriced' }, t('panel.unpriced', { count: compact.format(cost.unpricedTokens) })),
+          h('div', { className: 'dsc-note', key: 'subagent-error' }, t('panel.subagentError', { count: errorCount })),
         )
       }
-      if (cost.fallbackTokens > 0) {
+      if (unavailableCount > 0) {
         rows.push(
-          h('div', { className: 'dsc-note', key: 'fallback' }, t('panel.fallback', { count: compact.format(cost.fallbackTokens) })),
+          h(
+            'div',
+            { className: 'dsc-note', key: 'subagent-unavailable' },
+            t('panel.subagentUnavailable', { count: unavailableCount }),
+          ),
+        )
+      }
+      if (externalCount > 0) {
+        rows.push(
+          h('div', { className: 'dsc-note', key: 'subagent-external' }, t('panel.subagentExternal', { count: externalCount })),
+        )
+      }
+      if (mismatchCount > 0) {
+        rows.push(
+          h('div', { className: 'dsc-note', key: 'subagent-mismatch' }, t('panel.subagentMismatch', { count: mismatchCount })),
+        )
+      }
+      if (unpriced > 0) {
+        rows.push(
+          h('div', { className: 'dsc-note', key: 'unpriced' }, t('panel.unpriced', { count: compact.format(unpriced) })),
+        )
+      }
+      if (fallback > 0) {
+        rows.push(
+          h('div', { className: 'dsc-note', key: 'fallback' }, t('panel.fallback', { count: compact.format(fallback) })),
         )
       }
       if (typeof cost.rate === 'number' && cost.rate !== 1 && typeof cost.baseCurrency === 'string') {
@@ -254,8 +414,8 @@ window.__ModuleLoader__.load({
               className: 'dsc-pill',
               'aria-haspopup': 'dialog',
               'aria-expanded': open,
-              'aria-label': t('pill.label', { value: display }),
-              title: t('pill.hint'),
+              'aria-label': t(childCount > 0 ? 'pill.labelSubagents' : 'pill.label', { value: display }),
+              title: t(childCount > 0 ? 'pill.hintSubagents' : 'pill.hint'),
               onClick: toggle,
             },
             h(
@@ -297,8 +457,9 @@ window.__ModuleLoader__.load({
     }
 
     return {
-      inject: ['slots', 'locale'],
+      inject: ['slots', 'locale', 'sessions'],
       apply(ctx) {
+        const ensureProjections = (sessionId) => ctx.sessions.refreshProjections(sessionId)
         ctx.effect(() => ctx.locale.register(NS, DICT), 'session-cost: dictionaries')
         ctx.slots.inject('conversation.composer.dock', () =>
           ctx.slots.register(
@@ -307,6 +468,7 @@ window.__ModuleLoader__.load({
               id: 'session-cost',
               order: 2,
               locale: NS,
+              inject: () => ({ ensureProjections }),
             },
             SessionCost,
           ),

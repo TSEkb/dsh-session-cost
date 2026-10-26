@@ -115,3 +115,15 @@ near(usdView.secondary.rate, 0.1497, 'secondary USD rate')
 console.log(`${usdView.secondary.currency === 'USD' && usdView.secondary.symbol === '$' ? 'ok  ' : 'FAIL'} secondary display metadata`)
 const secondaryTotal = (usdView.totals.cacheMiss + usdView.totals.cacheHit + usdView.totals.output) * (usdView.secondary.rate / usdView.rate)
 near(secondaryTotal, (0.001 + 0.00018 + 0.002) * 0.1497, 'secondary USD conversion')
+
+// 11. A fork-inherited prefix is already billed to the parent; the child counts
+// only its own suffix.
+let forkState = definition.init({}, 2)
+forkState = definition.apply(forkState, { ...step(1, 1, usageA, peakTime), seq: 0 })
+let forkView = viewOf(forkState)
+near(forkView.totals.cacheMiss, 0, 'fork: inherited cache-miss not billed again')
+near(forkView.tokens.cacheMiss, 0, 'fork: inherited tokens not counted')
+forkState = definition.apply(forkState, { ...step(1, 1, usageA, peakTime), seq: 2 })
+forkView = viewOf(forkState)
+near(forkView.totals.cacheMiss, 0.002, 'fork: own cache-miss billed')
+near(forkView.tokens.cacheMiss, 1000, 'fork: own tokens counted')

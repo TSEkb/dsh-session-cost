@@ -1,6 +1,6 @@
 {
   "meta": {
     "title": "Session Cost",
-    "description": "Adds an estimated cost pill below the composer, priced from the session's token usage at configurable per-model rates."
+    "description": "Adds an estimated cost pill below the composer, priced from the session and its local subagent sessions at configurable per-model rates."
   }
 }
