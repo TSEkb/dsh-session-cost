@@ -1,0 +1,6 @@
+# Session cost: one Host row registering the `sessionCost` projection. The
+# Client half rides the package's `dsh.client` declaration, so no separate
+# Client row is inserted here.
+- insert:
+    - id: session-cost
+      name: '@local/session-cost'

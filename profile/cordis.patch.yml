@@ -1,0 +1,11 @@
+# Estimated session cost beside the composer: the provider's published list is
+# quoted in CNY, so the pill converts it to rubles and shows dollars beside the
+# total. Prices stay in the provider's own currency; only display converts.
+- id: session-cost
+  name: "@local/session-cost"
+  config:
+    rate: 12.0557
+    secondary:
+      currency: USD
+      symbol: "$"
+      rate: 0.1497

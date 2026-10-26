@@ -1,0 +1,6 @@
+.probe/
+node_modules/
+packaging/
+*.deb
+*.log
+.DS_Store
