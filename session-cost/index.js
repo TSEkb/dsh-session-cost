@@ -690,6 +690,7 @@ export function apply(ctx, config) {
    * @returns the same state for irrelevant events, an advanced copy otherwise.
    */
   function fold(state, event) {
+    if (typeof event.seq === 'number' && event.seq < (state.inheritedFrom ?? 0)) return state
     if (event.type === 'request/context') {
       const provider = stringOrNull(event.data?.provider)
       const model = stringOrNull(event.data?.model)
@@ -730,6 +731,7 @@ export function apply(ctx, config) {
       provider: state.provider,
       model: state.model,
       sessionId: state.sessionId,
+      inheritedFrom: state.inheritedFrom,
       keys,
       tokens: addBuckets(baseTokens, sample.tokens),
       totals: addBuckets(baseTotals, sample.totals),
@@ -758,10 +760,13 @@ export function apply(ctx, config) {
 
   ctx.sessionProjections.register({
     key: 'sessionCost',
-    stateVersion: 3,
+    stateVersion: 4,
     stateSchema: { parse: (value) => value },
-    init: (header) => ({
+    init: (header, inheritedEventCount) => ({
       sessionId: typeof header?.id === 'string' ? header.id : null,
+      // A forked child inherits its parent's event prefix, which the parent has
+      // already paid for; the child counts only events after that cut.
+      inheritedFrom: Number.isFinite(inheritedEventCount) ? inheritedEventCount : 0,
       provider: null,
       model: null,
       keys: {},

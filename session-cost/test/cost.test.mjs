@@ -317,6 +317,22 @@ const check = (name, ok, detail) => results.push({ name, ok, detail })
   rmSync(root, { recursive: true, force: true })
 }
 
+// 15. A fork child does not bill its inherited prefix a second time.
+{
+  const mountedFork = {}
+  mod.apply(registry(mountedFork), mod.Config['~standard'].validate({ rates: { USD: 80.53, CNY: 12.0557 } }).value)
+  const forkDefinition = mountedFork.definition
+  const event = (seq, usage) => ({ type: 'assistant/message', seq, time: PEAK, data: { turn: 1, step: 1, usage } })
+  let state = forkDefinition.init({ id: 'child' }, 2)
+  state = forkDefinition.apply(state, { type: 'request/context', data: { provider: 'deepseek-official', model: 'deepseek-flash' } })
+  state = forkDefinition.apply(state, event(0, { inputTokens: 1000, outputTokens: 100 }))
+  const beforeCut = forkDefinition.wire.view(state)
+  check('fork: inherited prefix not billed', sum(beforeCut.totals) === 0 && beforeCut.tokens.cacheMiss === 0, money(sum(beforeCut.totals)))
+  state = forkDefinition.apply(state, event(2, { inputTokens: 1000, outputTokens: 100 }))
+  const afterCut = forkDefinition.wire.view(state)
+  check('fork: own suffix billed', near(sum(afterCut.totals), (1000 * 2 * 12.0557 + 100 * 8 * 12.0557) / 1e6), money(sum(afterCut.totals)))
+}
+
 const failed = results.filter((r) => !r.ok)
 for (const r of results) console.log(`${r.ok ? 'PASS' : 'FAIL'}  ${r.name}  - ${r.detail}`)
 console.log(`\n${results.length - failed.length}/${results.length} passed`)
