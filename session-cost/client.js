@@ -9,9 +9,7 @@ window.__ModuleLoader__.load({
     const DICT = {
       en: {
         'pill.label': 'Estimated session cost {value}',
-        'pill.labelSubagents': 'Estimated cost including subagents {value}',
         'pill.hint': 'Priced from this session’s token usage',
-        'pill.hintSubagents': 'Priced from this session and its local subagent sessions',
         'panel.title': 'Session cost',
         'panel.model': 'Model',
         'panel.cacheMiss': 'Input · cache miss',
@@ -19,27 +17,57 @@ window.__ModuleLoader__.load({
         'panel.cacheWrite': 'Cache write',
         'panel.output': 'Output',
         'panel.total': 'Total',
-        'panel.thisSession': 'This session',
-        'panel.subagents': 'Subagents ({count})',
-        'panel.subagentLoading': 'Reading subagent sessions…',
-        'panel.subagentError': '{count} subagent session(s) could not be read.',
-        'panel.subagentUnavailable': '{count} subagent session(s) have no cost projection.',
-        'panel.subagentExternal': '{count} external subagent(s) are not priced.',
-        'panel.subagentMismatch': '{count} subagent session(s) use a different price and are excluded.',
-        'panel.tier.peak': 'This session was priced at peak-hour rates.',
-        'panel.tier.idle': 'This session was priced at off-peak rates.',
+        'panel.keys': 'By key',
+        'panel.lifetime': 'Spending by period',
+        'panel.period.session': 'This session',
+        'panel.period.today': 'Today',
+        'panel.period.week': '7 d',
+        'panel.period.month': '30 d',
+        'panel.period.all': 'All',
+        'panel.period.total': 'Total',
+        'panel.periodNote': 'The first column is this session; the rest count {count} saved sessions by the period they started in.',
+        'panel.tier.peak': 'Priced at peak-hour rates.',
+        'panel.tier.idle': 'Priced at off-peak rates.',
         'panel.unpriced': '{count} tokens had no configured price.',
         'panel.fallback': '{count} tokens used the fallback model’s price.',
-        'panel.converted': 'Converted from {from} at 1 {from} = {rate} {symbol}.',
+        'panel.delegates': 'Includes {count} delegated sessions.',
+        'panel.rates': 'Rates: {list}.',
         'panel.secondary': '≈ {value} {currency}',
         'panel.note': 'Estimate only: token usage at published per-million prices, not a billing statement.',
         'panel.unknown': '—',
       },
+      ru: {
+        'pill.label': 'Примерная стоимость сессии {value}',
+        'pill.hint': 'Оценка по расходу токенов этой сессии',
+        'panel.title': 'Стоимость сессии',
+        'panel.model': 'Модель',
+        'panel.cacheMiss': 'Вход · мимо кэша',
+        'panel.cacheHit': 'Вход · из кэша',
+        'panel.cacheWrite': 'Запись кэша',
+        'panel.output': 'Выход',
+        'panel.total': 'Итого',
+        'panel.keys': 'По ключам',
+        'panel.lifetime': 'Расход по периодам',
+        'panel.period.session': 'Эта сессия',
+        'panel.period.today': 'Сегодня',
+        'panel.period.week': '7 дней',
+        'panel.period.month': '30 дней',
+        'panel.period.all': 'Всего',
+        'panel.period.total': 'Итого',
+        'panel.periodNote': 'Первая колонка — эта сессия; остальные считают {count} сохранённых сессий по периоду их начала.',
+        'panel.tier.peak': 'Считано по пиковому тарифу.',
+        'panel.tier.idle': 'Считано по ночному тарифу.',
+        'panel.unpriced': '{count} токенов без настроенной цены.',
+        'panel.fallback': '{count} токенов оценены по цене запасной модели.',
+        'panel.delegates': 'Включая делегации: {count}.',
+        'panel.rates': 'Курсы: {list}.',
+        'panel.secondary': '≈ {value} {currency}',
+        'panel.note': 'Только оценка: расход токенов по опубликованным ценам, а не счёт.',
+        'panel.unknown': '—',
+      },
       zh: {
         'pill.label': '会话预估费用 {value}',
-        'pill.labelSubagents': '会话预估费用（含子代理）{value}',
         'pill.hint': '按本会话的 token 用量估算',
-        'pill.hintSubagents': '按本会话及其本地子代理会话的 token 用量估算',
         'panel.title': '会话费用',
         'panel.model': '模型',
         'panel.cacheMiss': '输入 · 缓存未命中',
@@ -47,18 +75,21 @@ window.__ModuleLoader__.load({
         'panel.cacheWrite': '缓存写入',
         'panel.output': '输出',
         'panel.total': '合计',
-        'panel.thisSession': '本会话',
-        'panel.subagents': '子代理（{count}）',
-        'panel.subagentLoading': '正在读取子代理会话…',
-        'panel.subagentError': '{count} 个子代理会话无法读取。',
-        'panel.subagentUnavailable': '{count} 个子代理会话没有费用数据。',
-        'panel.subagentExternal': '{count} 个外部子代理未计价。',
-        'panel.subagentMismatch': '{count} 个子代理会话使用不同价格，已排除。',
-        'panel.tier.peak': '本会话按高峰时段价格计算。',
-        'panel.tier.idle': '本会话按空闲时段价格计算。',
+        'panel.keys': '按密钥',
+        'panel.lifetime': '按时段费用',
+        'panel.period.session': '本会话',
+        'panel.period.today': '今天',
+        'panel.period.week': '7 天',
+        'panel.period.month': '30 天',
+        'panel.period.all': '全部',
+        'panel.period.total': '合计',
+        'panel.periodNote': '第一列是本会话；其余按开始时间统计本机 {count} 个已保存会话。',
+        'panel.tier.peak': '按高峰时段价格计算。',
+        'panel.tier.idle': '按空闲时段价格计算。',
         'panel.unpriced': '{count} 个 token 没有可用价格。',
         'panel.fallback': '{count} 个 token 使用了备用模型的价格。',
-        'panel.converted': '按 1 {from} = {rate} {symbol} 换算。',
+        'panel.delegates': '包含 {count} 个委派会话。',
+        'panel.rates': '汇率：{list}。',
         'panel.secondary': '≈ {value} {currency}',
         'panel.note': '仅为估算：按公布的每百万 token 单价计算，不是账单。',
         'panel.unknown': '—',
@@ -71,7 +102,7 @@ window.__ModuleLoader__.load({
 .dsc-pill:hover,.dsc-pill[aria-expanded=true]{background:var(--dsw-alias-interactive-bg-hover);color:var(--dsw-alias-label-secondary)}
 .dsc-pill:focus-visible{outline:var(--dsw-focus-ring-width) solid var(--dsw-focus-ring-color,var(--dsw-alias-state-business-primary));outline-offset:-2px}
 .dsc-pill svg{flex:none;width:14px;height:14px}
-.dsc-panel{box-sizing:border-box;position:fixed;z-index:60;width:280px;padding:12px;border-radius:var(--dsw-radius-lg);background:var(--dsw-specific-menu);border:.5px solid var(--dsw-alias-border-l1);box-shadow:var(--dsw-elevation-panel);backdrop-filter:var(--dsw-menu-backdrop-filter);color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px}
+.dsc-panel{box-sizing:border-box;position:fixed;z-index:60;width:360px;padding:12px;border-radius:var(--dsw-radius-lg);background:var(--dsw-specific-menu);border:.5px solid var(--dsw-alias-border-l1);box-shadow:var(--dsw-elevation-panel);backdrop-filter:var(--dsw-menu-backdrop-filter);color:var(--dsw-alias-label-secondary);font-size:12px;line-height:18px}
 .dsc-head{align-items:baseline;gap:8px;display:flex;justify-content:space-between;margin-bottom:6px}
 .dsc-title{color:var(--dsw-alias-label-primary);font-size:13px;font-weight:500;line-height:20px}
 .dsc-row{align-items:baseline;gap:8px;padding:2px 0;display:flex}
@@ -79,9 +110,16 @@ window.__ModuleLoader__.load({
 .dsc-count{margin-left:auto;color:var(--dsw-alias-label-caption);font-variant-numeric:tabular-nums;white-space:nowrap}
 .dsc-amount{color:var(--dsw-alias-label-primary);font-variant-numeric:tabular-nums;white-space:nowrap;flex:none}
 .dsc-sep{height:.5px;background:var(--dsw-alias-border-l1);margin:7px 0}
+.dsc-section{margin:2px 0 3px;color:var(--dsw-alias-label-caption);font-size:11px;letter-spacing:.02em;text-transform:uppercase}
 .dsc-note{margin-top:7px;color:var(--dsw-alias-label-caption);font-size:11px;line-height:15px}
 .dsc-total .dsc-amount{font-weight:500}
 .dsc-secondary{margin-top:2px;color:var(--dsw-alias-label-caption);font-variant-numeric:tabular-nums;text-align:right;font-size:11px;line-height:15px}
+.dsc-table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+.dsc-table th{padding:0 0 3px 8px;color:var(--dsw-alias-label-caption);font-weight:400;font-size:11px;text-align:right;white-space:nowrap}
+.dsc-table th:first-child{padding-left:0;text-align:left}
+.dsc-table td{padding:2px 0 2px 8px;color:var(--dsw-alias-label-primary);text-align:right;white-space:nowrap}
+.dsc-table td:first-child{padding-left:0;color:var(--dsw-alias-label-tertiary);text-align:left;max-width:96px;overflow:hidden;text-overflow:ellipsis}
+.dsc-table tr.dsc-sum td{border-top:.5px solid var(--dsw-alias-border-l1);padding-top:4px;font-weight:500}
 `
 
     const compact = new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 })
@@ -112,66 +150,21 @@ window.__ModuleLoader__.load({
     }
 
     /**
-     * Money carried by one `sessionCost` wire value.
-     * @param cost - one session's cost projection value.
-     * @returns the summed display-currency amount.
+     * Build a translator over one dictionary, for the forced-language case.
+     * @param dictionary - the chosen locale's table.
+     * @returns a `t(key, values)` function like the locale seat provides.
      */
-    function costTotal(cost) {
-      if (cost === null || cost === undefined || cost.totals === undefined || cost.totals === null) return 0
-      const totals = cost.totals
-      return (
-        (Number.isFinite(totals.cacheMiss) ? totals.cacheMiss : 0) +
-        (Number.isFinite(totals.cacheHit) ? totals.cacheHit : 0) +
-        (Number.isFinite(totals.cacheWrite) ? totals.cacheWrite : 0) +
-        (Number.isFinite(totals.output) ? totals.output : 0)
-      )
+    function translator(dictionary) {
+      return (key, values) => {
+        const template = dictionary[key] ?? key
+        if (values === undefined) return template
+        return template.replace(/\{(\w+)\}/g, (match, name) => (values[name] === undefined ? match : String(values[name])))
+      }
     }
 
-    /**
-     * Flatten the local subagent tree below one session. Children come from the
-     * parent-owned `subagentCatalog` projection; each child's own catalog is
-     * read from the session-list projection snapshot, so nested delegation is
-     * included. External children have no local Session and therefore no cost.
-     * @param rootId - the session whose pill is open.
-     * @param rootCatalog - the root session's direct children.
-     * @param projections - `useSessions().projectionsBySession`.
-     * @returns descendant rows in discovery order.
-     */
-    function collectSubagentCosts(rootId, rootCatalog, projections) {
-      const nodes = []
-      const seen = new Set([rootId])
-      const queue = []
-      const push = (catalog, depth) => {
-        if (!Array.isArray(catalog)) return
-        for (const entry of catalog) {
-          if (entry === null || typeof entry !== 'object' || typeof entry.id !== 'string') continue
-          if (seen.has(entry.id)) continue
-          queue.push({ entry, depth })
-        }
-      }
-      push(rootCatalog, 1)
-      let guard = 0
-      while (queue.length > 0 && guard < 200) {
-        guard += 1
-        const { entry, depth } = queue.shift()
-        if (seen.has(entry.id)) continue
-        seen.add(entry.id)
-        if (entry.mode === 'external') {
-          nodes.push({ id: entry.id, label: entry.label, depth, external: true })
-          continue
-        }
-        const snapshot = projections[entry.id]
-        const cost = snapshot === undefined ? undefined : snapshot.values?.sessionCost
-        const state = snapshot === undefined ? undefined : snapshot.state
-        const error = state === 'error'
-        const unavailable = cost === undefined && (state === 'ready' || state === 'migration-required')
-        const loading = cost === undefined && !error && !unavailable
-        nodes.push({ id: entry.id, label: entry.label, depth, cost, loading, error, unavailable })
-        const catalog = snapshot === undefined ? undefined : snapshot.values?.subagentCatalog
-        if (Array.isArray(catalog)) push(catalog, depth + 1)
-      }
-      return nodes
-    }
+    /** Sum one token or charge bucket set. */
+    const sumBuckets = (buckets) =>
+      buckets.cacheMiss + buckets.cacheHit + buckets.cacheWrite + buckets.output
 
     function Tokens({ children }) {
       return h('span', { className: 'dsc-count' }, compact.format(children))
@@ -189,19 +182,21 @@ window.__ModuleLoader__.load({
 
     /**
      * One dock pill: the session's estimated cost, with a click-open breakdown
-     * priced from the `sessionCost` projection.
+     * priced from the `sessionCost` projection and split per API key.
      * @param props - session slot props (`useProjection`) plus the bound `t`.
      * @returns the pill, or nothing while the session has no priced usage.
      */
-    function SessionCost({ useProjection, useSessions, ensureProjections, sessionId, t }) {
+    function SessionCost({ useProjection, t: injectedT }) {
       const cost = useProjection('sessionCost')
-      const liveCatalog = useProjection('subagentCatalog')
-      const projections = useSessions((state) => state.projectionsBySession) ?? {}
+      // A forced language keeps this panel readable inside an English shell.
+      const t =
+        cost !== undefined && cost !== null && typeof cost.language === 'string' && DICT[cost.language] !== undefined
+          ? translator(DICT[cost.language])
+          : injectedT
       const [open, setOpen] = React.useState(false)
       const [position, setPosition] = React.useState(null)
       const rootRef = React.useRef(null)
       const panelRef = React.useRef(null)
-      const requested = React.useRef(new Set())
 
       React.useEffect(() => {
         if (!open) return undefined
@@ -222,49 +217,15 @@ window.__ModuleLoader__.load({
         }
       }, [open])
 
-      const catalog = liveCatalog ?? projections[sessionId]?.values?.subagentCatalog
-      const nodes = collectSubagentCosts(sessionId, catalog, projections)
-      const localChildren = nodes.filter((node) => node.external !== true)
-      const childCount = localChildren.length
-      const externalCount = nodes.length - childCount
-      const loadingCount = localChildren.filter((node) => node.loading).length
-      const errorCount = localChildren.filter((node) => node.error).length
-      const unavailableCount = localChildren.filter((node) => node.unavailable).length
-      const pendingIds = localChildren.filter((node) => node.loading).map((node) => node.id)
-      const pendingKey = pendingIds.join('|')
-
-      React.useEffect(() => {
-        if (typeof ensureProjections !== 'function') return
-        for (const id of pendingIds) {
-          if (requested.current.has(id)) continue
-          requested.current.add(id)
-          Promise.resolve(ensureProjections(id)).catch(() => {})
-        }
-      }, [pendingKey, ensureProjections])
-
       if (cost === undefined || cost === null) return null
 
-      const tokens = cost.tokens ?? { cacheMiss: 0, cacheHit: 0, cacheWrite: 0, output: 0 }
-      const totals = cost.totals ?? { cacheMiss: 0, cacheHit: 0, cacheWrite: 0, output: 0 }
-      const parentTotal = costTotal(cost)
-      const samePrice = (child) =>
-        child.cost !== undefined &&
-        child.cost !== null &&
-        child.cost.symbol === cost.symbol &&
-        child.cost.rate === cost.rate
-      const pricedChildren = localChildren.filter(samePrice)
-      const childTotal = pricedChildren.reduce((sum, child) => sum + costTotal(child.cost), 0)
-      const mismatchCount = localChildren.filter(
-        (child) => child.cost !== undefined && child.cost !== null && !samePrice(child),
-      ).length
-      const unpriced =
-        (cost.unpricedTokens ?? 0) + localChildren.reduce((sum, child) => sum + (child.cost?.unpricedTokens ?? 0), 0)
-      const fallback =
-        (cost.fallbackTokens ?? 0) + localChildren.reduce((sum, child) => sum + (child.cost?.fallbackTokens ?? 0), 0)
-      const total = parentTotal + childTotal
-      const pending = loadingCount > 0
-      if (total <= 0 && !pending) return null
-      const display = (pending ? '≈' : '') + cost.symbol + formatMoney(total)
+      const tokens = cost.tokens
+      const totals = cost.totals
+      if (sumBuckets(tokens) === 0) return null
+
+      const total = sumBuckets(totals)
+      const display = cost.symbol + formatMoney(total)
+      const keys = Array.isArray(cost.keys) ? cost.keys : []
 
       function toggle(event) {
         if (open) {
@@ -272,7 +233,7 @@ window.__ModuleLoader__.load({
           return
         }
         const rect = event.currentTarget.getBoundingClientRect()
-        const width = 280
+        const width = 360
         setPosition({
           left: Math.max(8, Math.min(rect.left, window.innerWidth - width - 8)),
           bottom: Math.max(8, window.innerHeight - rect.top + 8),
@@ -314,21 +275,6 @@ window.__ModuleLoader__.load({
           amount: cost.symbol + formatMoney(totals.output),
         }),
         h('div', { className: 'dsc-sep', key: 'sep-2' }),
-        childCount > 0
-          ? h(Row, {
-              key: 'this-session',
-              label: t('panel.thisSession'),
-              amount: cost.symbol + formatMoney(parentTotal),
-            })
-          : null,
-        childCount > 0
-          ? h(Row, {
-              key: 'subagents',
-              label: t('panel.subagents', { count: childCount }),
-              amount: pending ? '…' : cost.symbol + formatMoney(childTotal),
-            })
-          : null,
-        childCount > 0 ? h('div', { className: 'dsc-sep', key: 'sep-3' }) : null,
         h(
           'div',
           { className: 'dsc-row dsc-total', key: 'total' },
@@ -337,9 +283,105 @@ window.__ModuleLoader__.load({
         ),
       ]
 
+      // Per-key split: one line per API key that actually billed tokens, so a
+      // Gemini key's spend is readable next to DeepSeek's.
+      if (keys.length > 0) {
+        rows.push(h('div', { className: 'dsc-sep', key: 'sep-keys' }))
+        rows.push(h('div', { className: 'dsc-section', key: 'keys-title' }, t('panel.keys')))
+        for (const key of keys) {
+          const label = typeof key.label === 'string' && key.label.length > 0 ? key.label : key.id
+          rows.push(
+            h(Row, {
+              key: 'key-' + key.id,
+              label,
+              amount: cost.symbol + formatMoney(sumBuckets(key.totals)),
+            }),
+          )
+        }
+      }
+
+      // Per-period totals: what each API key has cost today, over rolling
+      // weeks and months, and in total, so a Gemini key billed in a subagent
+      // session is visible from a DeepSeek-only session too.
+      const lifetime = cost.lifetime
+      const periods = lifetime !== undefined && lifetime !== null && Array.isArray(lifetime.periods) ? lifetime.periods : []
+      if (periods.length > 0) {
+        const shortLabel = (key) => {
+          const label = typeof key.label === 'string' && key.label.length > 0 ? key.label : key.id
+          const head = label.split(' · ')[0]
+          return head.length > 0 ? head : label
+        }
+        const ids = []
+        for (const period of periods) {
+          for (const key of period.keys ?? []) {
+            if (!ids.includes(key.id)) ids.push(key.id)
+          }
+        }
+        const amountOf = (period, id) => {
+          const found = (period.keys ?? []).find((key) => key.id === id)
+          return found === undefined ? 0 : sumBuckets(found.totals)
+        }
+        const cells = []
+        for (const id of ids) {
+          const sample = periods
+            .flatMap((period) => period.keys ?? [])
+            .find((key) => key.id === id)
+          cells.push({ id, label: sample === undefined ? id : shortLabel(sample) })
+        }
+        rows.push(h('div', { className: 'dsc-sep', key: 'sep-lifetime' }))
+        rows.push(h('div', { className: 'dsc-section', key: 'lifetime-title' }, t('panel.lifetime')))
+        rows.push(
+          h(
+            'table',
+            { className: 'dsc-table', key: 'lifetime-table' },
+            h(
+              'thead',
+              null,
+              h(
+                'tr',
+                null,
+                h('th', null, ''),
+                periods.map((period) => h('th', { key: period.id }, t('panel.period.' + period.id))),
+              ),
+            ),
+            h(
+              'tbody',
+              null,
+              cells.map((cell) =>
+                h(
+                  'tr',
+                  { key: cell.id },
+                  h('td', { title: cell.label }, cell.label),
+                  periods.map((period) => {
+                    const amount = amountOf(period, cell.id)
+                    return h('td', { key: period.id }, amount > 0 ? cost.symbol + formatMoney(amount) : '—')
+                  }),
+                ),
+              ),
+              h(
+                'tr',
+                { className: 'dsc-sum', key: 'sum' },
+                h('td', null, t('panel.period.total')),
+                periods.map((period) => {
+                  const amount = (period.keys ?? []).reduce((acc, key) => acc + sumBuckets(key.totals), 0)
+                  return h('td', { key: period.id }, amount > 0 ? cost.symbol + formatMoney(amount) : '—')
+                }),
+              ),
+            ),
+          ),
+        )
+        rows.push(
+          h(
+            'div',
+            { className: 'dsc-note', key: 'lifetime-note' },
+            t('panel.periodNote', { count: lifetime.sessions }),
+          ),
+        )
+      }
+
       const secondary = cost.secondary
-      if (secondary !== undefined && secondary !== null && typeof secondary.rate === 'number' && cost.rate > 0) {
-        const converted = total * (secondary.rate / cost.rate)
+      if (secondary !== undefined && secondary !== null && typeof secondary.rate === 'number' && secondary.rate > 0) {
+        const converted = total * secondary.rate
         rows.push(
           h(
             'div',
@@ -352,52 +394,35 @@ window.__ModuleLoader__.load({
       if (cost.tier === 'peak' || cost.tier === 'idle') {
         rows.push(h('div', { className: 'dsc-note', key: 'tier' }, t('panel.tier.' + cost.tier)))
       }
-      if (pending) {
-        rows.push(h('div', { className: 'dsc-note', key: 'subagent-loading' }, t('panel.subagentLoading')))
-      }
-      if (errorCount > 0) {
+      if (cost.unpricedTokens > 0) {
         rows.push(
-          h('div', { className: 'dsc-note', key: 'subagent-error' }, t('panel.subagentError', { count: errorCount })),
+          h('div', { className: 'dsc-note', key: 'unpriced' }, t('panel.unpriced', { count: compact.format(cost.unpricedTokens) })),
         )
       }
-      if (unavailableCount > 0) {
+      if (cost.fallbackTokens > 0) {
         rows.push(
-          h(
-            'div',
-            { className: 'dsc-note', key: 'subagent-unavailable' },
-            t('panel.subagentUnavailable', { count: unavailableCount }),
-          ),
+          h('div', { className: 'dsc-note', key: 'fallback' }, t('panel.fallback', { count: compact.format(cost.fallbackTokens) })),
         )
       }
-      if (externalCount > 0) {
-        rows.push(
-          h('div', { className: 'dsc-note', key: 'subagent-external' }, t('panel.subagentExternal', { count: externalCount })),
-        )
+
+      if (typeof cost.delegates === 'number' && cost.delegates > 0) {
+        rows.push(h('div', { className: 'dsc-note', key: 'delegates' }, t('panel.delegates', { count: cost.delegates })))
       }
-      if (mismatchCount > 0) {
-        rows.push(
-          h('div', { className: 'dsc-note', key: 'subagent-mismatch' }, t('panel.subagentMismatch', { count: mismatchCount })),
-        )
+
+      // One rate line per base currency actually used, instead of one global
+      // conversion: DeepSeek quotes CNY, Gemini quotes USD.
+      const currencies = []
+      for (const key of keys) {
+        if (typeof key.currency !== 'string' || typeof key.rate !== 'number' || key.rate <= 0) continue
+        if (key.currency === cost.currency) continue
+        if (currencies.some((entry) => entry.currency === key.currency)) continue
+        currencies.push({ currency: key.currency, rate: key.rate })
       }
-      if (unpriced > 0) {
-        rows.push(
-          h('div', { className: 'dsc-note', key: 'unpriced' }, t('panel.unpriced', { count: compact.format(unpriced) })),
-        )
+      if (currencies.length > 0) {
+        const list = currencies.map((entry) => '1 ' + entry.currency + ' = ' + formatRate(entry.rate) + ' ' + cost.symbol).join(' · ')
+        rows.push(h('div', { className: 'dsc-note', key: 'rates' }, t('panel.rates', { list })))
       }
-      if (fallback > 0) {
-        rows.push(
-          h('div', { className: 'dsc-note', key: 'fallback' }, t('panel.fallback', { count: compact.format(fallback) })),
-        )
-      }
-      if (typeof cost.rate === 'number' && cost.rate !== 1 && typeof cost.baseCurrency === 'string') {
-        rows.push(
-          h(
-            'div',
-            { className: 'dsc-note', key: 'converted' },
-            t('panel.converted', { from: cost.baseCurrency, rate: formatRate(cost.rate), symbol: cost.symbol }),
-          ),
-        )
-      }
+
       rows.push(h('div', { className: 'dsc-note', key: 'note' }, t('panel.note')))
 
       return h(
@@ -414,8 +439,8 @@ window.__ModuleLoader__.load({
               className: 'dsc-pill',
               'aria-haspopup': 'dialog',
               'aria-expanded': open,
-              'aria-label': t(childCount > 0 ? 'pill.labelSubagents' : 'pill.label', { value: display }),
-              title: t(childCount > 0 ? 'pill.hintSubagents' : 'pill.hint'),
+              'aria-label': t('pill.label', { value: display }),
+              title: t('pill.hint'),
               onClick: toggle,
             },
             h(
@@ -457,9 +482,8 @@ window.__ModuleLoader__.load({
     }
 
     return {
-      inject: ['slots', 'locale', 'sessions'],
+      inject: ['slots', 'locale'],
       apply(ctx) {
-        const ensureProjections = (sessionId) => ctx.sessions.refreshProjections(sessionId)
         ctx.effect(() => ctx.locale.register(NS, DICT), 'session-cost: dictionaries')
         ctx.slots.inject('conversation.composer.dock', () =>
           ctx.slots.register(
@@ -468,7 +492,6 @@ window.__ModuleLoader__.load({
               id: 'session-cost',
               order: 2,
               locale: NS,
-              inject: () => ({ ensureProjections }),
             },
             SessionCost,
           ),

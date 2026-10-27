@@ -1,9 +1,12 @@
 {
   "name": "@local/session-cost",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "private": true,
   "type": "module",
-  "description": "Estimated session cost, including local subagent sessions, shown beside the composer",
+  "description": "Estimated session cost from provider-reported token usage, shown beside the composer and split per API key",
+  "scripts": {
+    "test": "node test/cost.test.mjs && node test/client.test.mjs"
+  },
   "exports": {
     ".": "./index.js",
     "./client": "./client.js",
@@ -14,6 +17,8 @@
     "index.js",
     "client.js",
     "cordis.patch.yml",
+    "README.md",
+    "test",
     "locale/*.json",
     "icon.svg"
   ],
